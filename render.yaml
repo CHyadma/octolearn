@@ -1,0 +1,16 @@
+# Render Blueprint: deploys the OctoLearn API (server/) as a free web service.
+# Render → New → Blueprint → pick this repo. The public URL becomes
+# https://<name>.onrender.com (free plan sleeps after 15 min idle; the SQLite
+# file lives on the instance disk and resets on every deploy).
+services:
+  - type: web
+    name: octolearn-api
+    runtime: node
+    plan: free
+    rootDir: server
+    buildCommand: npm install
+    startCommand: npm start
+    healthCheckPath: /api/health
+    envVars:
+      - key: NODE_VERSION
+        value: "22"

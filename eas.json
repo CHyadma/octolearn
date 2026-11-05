@@ -2,7 +2,15 @@
   "cli": { "version": ">= 16.0.0", "appVersionSource": "local" },
   "build": {
     "development": { "developmentClient": true, "distribution": "internal" },
-    "preview": { "distribution": "internal", "android": { "buildType": "apk" } },
-    "production": {}
+    "preview": {
+      "distribution": "internal",
+      "channel": "preview",
+      "android": { "buildType": "apk" },
+      "env": { "EXPO_PUBLIC_API_URL": "https://octolearn-api.onrender.com" }
+    },
+    "production": {
+      "channel": "production",
+      "env": { "EXPO_PUBLIC_API_URL": "https://octolearn-api.onrender.com" }
+    }
   }
 }

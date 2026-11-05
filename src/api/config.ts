@@ -6,6 +6,7 @@ const PORT = 4000;
 /**
  * Where the OctoLearn API lives.
  * 1. EXPO_PUBLIC_API_URL (e.g. in .env) always wins — use it for a deployed server or tunnel mode.
+ *    Release builds fall back to app.json → expo.extra.apiUrl (the Render deployment).
  * 2. In Expo Go we reuse the dev machine's LAN IP that Metro is served from, so a phone
  *    on the same Wi-Fi reaches `npm run server` on the Mac without any config.
  * 3. Simulator / web fallbacks.
@@ -13,6 +14,9 @@ const PORT = 4000;
 function resolveApiUrl(): string {
   const fromEnv = process.env.EXPO_PUBLIC_API_URL;
   if (fromEnv) return fromEnv.replace(/\/$/, '');
+  // Release builds / `eas update`: use the deployed server from app.json → expo.extra.apiUrl.
+  const deployed = Constants.expoConfig?.extra?.apiUrl as string | undefined;
+  if (!__DEV__ && deployed) return deployed.replace(/\/$/, '');
   if (Platform.OS === 'web' && typeof window !== 'undefined') {
     return `${window.location.protocol}//${window.location.hostname}:${PORT}`;
   }

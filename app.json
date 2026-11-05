@@ -33,15 +33,7 @@
     ],
     "scheme": "octolearn",
     "extra": {
-      "router": {
-        "asyncRoutes": {
-          "web": true
-        }
-      },
-      "eas": {
-        "projectId": "3d96b944-2de9-47f3-a387-ffe1d1b96c28"
-      }
-    },
-    "owner": "yadma"
+      "apiUrl": "https://octolearn-api.onrender.com"
+    }
   }
 }
