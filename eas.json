@@ -6,11 +6,11 @@
       "distribution": "internal",
       "channel": "preview",
       "android": { "buildType": "apk" },
-      "env": { "EXPO_PUBLIC_API_URL": "https://octolearn-api.onrender.com" }
+      "env": { "EXPO_PUBLIC_API_URL": "https://octolearn-api-qau9.onrender.com" }
     },
     "production": {
       "channel": "production",
-      "env": { "EXPO_PUBLIC_API_URL": "https://octolearn-api.onrender.com" }
+      "env": { "EXPO_PUBLIC_API_URL": "https://octolearn-api-qau9.onrender.com" }
     }
   }
 }
