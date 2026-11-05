@@ -1,53 +1,75 @@
 import { StyleSheet, Text, View } from 'react-native';
 import Ionicons from '@expo/vector-icons/Ionicons';
 
-import { colors, space, type } from '../theme';
-import { ProgressBar } from './ProgressBar';
+import { colors, radius, space, themed, type } from '../theme';
 
 interface Props {
-  completed: number;
-  total: number;
-  percent: number;
   xp: number;
   streak: number;
 }
 
-/** Always-visible course progress, streak and XP on the home screen. */
-export function CourseTopBar({ completed, total, percent, xp, streak }: Props) {
+/** Shared top app bar: streak chip · brand · XP chip. */
+export function CourseTopBar({ xp, streak }: Props) {
   return (
-    <View style={styles.wrap}>
-      <View style={styles.row}>
-        <View style={styles.progress}>
-          <Text style={styles.label} numberOfLines={1}>
-            {completed} / {total} хичээл · {percent}%
-          </Text>
-          <ProgressBar value={total ? completed / total : 0} height={14} />
-        </View>
-        <View style={styles.stat} accessibilityLabel={`${streak} өдрийн streak`}>
-          <Ionicons name="flame" size={22} color={streak > 0 ? colors.orange : colors.lockedIcon} />
-          <Text style={[styles.statText, { color: streak > 0 ? colors.orange : colors.lockedIcon }]}>{streak}</Text>
-        </View>
-        <View style={styles.stat} accessibilityLabel={`${xp} XP`}>
-          <Ionicons name="flash" size={22} color={colors.gold} />
-          <Text style={[styles.statText, { color: colors.goldDark }]}>{xp}</Text>
-        </View>
+    <View style={styles.bar}>
+      <View
+        style={[
+          styles.chip,
+          {
+            backgroundColor: streak > 0 ? colors.tertiaryFixed : colors.surfaceContainer,
+          },
+        ]}
+        accessibilityLabel={`${streak} өдрийн цуврал`}
+      >
+        <Ionicons name="flame" size={18} color={streak > 0 ? colors.tertiaryContainer : colors.outline} />
+        <Text
+          style={[
+            styles.chipText,
+            {
+              color: streak > 0 ? colors.onTertiaryFixedVariant : colors.outline,
+            },
+          ]}
+        >
+          {streak} өдөр
+        </Text>
+      </View>
+      <Text style={styles.brand} accessibilityRole="header">
+        OctoLearn
+      </Text>
+      <View style={[styles.chip, { backgroundColor: colors.surfaceHigh }]} accessibilityLabel={`${xp} XP`}>
+        <Ionicons name="diamond" size={16} color={colors.primaryContainer} />
+        <Text style={[styles.chipText, { color: colors.primary }]}>{xp} XP</Text>
       </View>
     </View>
   );
 }
 
-const styles = StyleSheet.create({
-  wrap: {
-    paddingHorizontal: space.lg,
-    paddingTop: space.sm,
-    paddingBottom: space.md,
-    borderBottomWidth: 2,
-    borderBottomColor: colors.border,
-    backgroundColor: colors.bg,
-  },
-  row: { flexDirection: 'row', alignItems: 'center', gap: space.md },
-  progress: { flex: 1, gap: 6 },
-  label: { ...type.caption },
-  stat: { flexDirection: 'row', alignItems: 'center', gap: 2, minWidth: 44, minHeight: 44, justifyContent: 'center' },
-  statText: { ...type.title, fontWeight: '800' },
-});
+const styles = themed(() =>
+  StyleSheet.create({
+    bar: {
+      flexDirection: 'row',
+      alignItems: 'center',
+      justifyContent: 'space-between',
+      paddingHorizontal: space.margin,
+      paddingVertical: space.sm,
+      backgroundColor: colors.surface,
+      shadowColor: '#000',
+      shadowOpacity: 0.05,
+      shadowRadius: 2,
+      shadowOffset: { width: 0, height: 1 },
+      elevation: 2,
+      zIndex: 10,
+    },
+    chip: {
+      flexDirection: 'row',
+      alignItems: 'center',
+      gap: 6,
+      paddingHorizontal: 12,
+      paddingVertical: 6,
+      borderRadius: radius.pill,
+      minHeight: 34,
+    },
+    chipText: { ...type.labelMd },
+    brand: { ...type.headlineMd, color: colors.primary, letterSpacing: -0.3 },
+  }),
+);

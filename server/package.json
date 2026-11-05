@@ -1,0 +1,21 @@
+{
+  "name": "octolearn-server",
+  "version": "1.0.0",
+  "description": "OctoLearn API: Node.js + Express + SQLite",
+  "main": "src/index.js",
+  "scripts": {
+    "start": "node src/index.js",
+    "seed": "node src/seed.js --reset",
+    "test": "node --test test/api.test.js"
+  },
+  "dependencies": {
+    "better-sqlite3": "^13.0.3",
+    "cors": "^2.8.6",
+    "express": "^5.3.0"
+  },
+  "private": true,
+  "type": "module",
+  "engines": {
+    "node": ">=18"
+  }
+}

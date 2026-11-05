@@ -1,6 +1,6 @@
 import { Modal, StyleSheet, Text, View } from 'react-native';
 
-import { colors, radius, space, type } from '../theme';
+import { colors, radius, space, themed, type } from '../theme';
 import { Button } from './Button';
 
 interface Props {
@@ -28,17 +28,29 @@ export function ConfirmDialog({ visible, title, message, confirmLabel, onConfirm
   );
 }
 
-const styles = StyleSheet.create({
-  backdrop: { flex: 1, backgroundColor: colors.overlay, justifyContent: 'center', padding: space.xl },
-  card: {
-    backgroundColor: colors.bg,
-    borderRadius: radius.lg,
-    padding: space.xl,
-    gap: space.md,
-    width: '100%',
-    maxWidth: 420,
-    alignSelf: 'center',
-  },
-  title: { ...type.h2, textAlign: 'center' },
-  message: { ...type.body, color: colors.textMuted, textAlign: 'center', marginBottom: space.sm },
-});
+const styles = themed(() =>
+  StyleSheet.create({
+    backdrop: {
+      flex: 1,
+      backgroundColor: colors.overlay,
+      justifyContent: 'center',
+      padding: space.xl,
+    },
+    card: {
+      backgroundColor: colors.surfaceLowest,
+      borderRadius: radius.xl,
+      padding: space.xl,
+      gap: space.md,
+      width: '100%',
+      maxWidth: 420,
+      alignSelf: 'center',
+    },
+    title: { ...type.headlineLg, textAlign: 'center' },
+    message: {
+      ...type.bodyMd,
+      color: colors.onSurfaceVariant,
+      textAlign: 'center',
+      marginBottom: space.sm,
+    },
+  }),
+);

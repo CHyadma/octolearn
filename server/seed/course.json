@@ -1,0 +1,262 @@
+{
+  "course": {
+    "id": "eng-a1",
+    "title": "Англи хэл — Анхан шат"
+  },
+  "units": [
+    {
+      "id": "u1",
+      "title": "Бүлэг 1: Танилцах",
+      "description": "Мэндлэх, өөрийгөө танилцуулах",
+      "color": "#58CC02",
+      "lessons": [
+        {
+          "id": "u1-l1",
+          "title": "Мэндчилгээ",
+          "description": "Hello, Hi, Good morning — өдөр тутмын мэндчилгээ.",
+          "videoUrl": "/videos/u1-l1.mp4",
+          "durationSec": 20
+        },
+        {
+          "id": "u1-l2",
+          "title": "Нэрээ хэлэх",
+          "description": "My name is... гэж өөрийгөө танилцуулах.",
+          "videoUrl": "/videos/u1-l2.mp4",
+          "durationSec": 20
+        },
+        {
+          "id": "u1-l3",
+          "title": "Хаанаас ирсэн бэ?",
+          "description": "Where are you from? I am from Mongolia.",
+          "videoUrl": "/videos/u1-l3.mp4",
+          "durationSec": 20
+        },
+        {
+          "id": "u1-l4",
+          "title": "Баярлалаа ба уучлаарай",
+          "description": "Thank you, Sorry, Excuse me — эелдэг үгс.",
+          "videoUrl": "/videos/u1-l4.mp4",
+          "durationSec": 20
+        },
+        {
+          "id": "u1-l5",
+          "title": "Баяртай гэх",
+          "description": "Goodbye, See you later — ярианы төгсгөл.",
+          "videoUrl": "/videos/u1-l5.mp4",
+          "durationSec": 20
+        }
+      ],
+      "quiz": {
+        "id": "u1-quiz",
+        "title": "Бүлэг 1-ийн шалгалт",
+        "passPercent": 60,
+        "questions": [
+          {
+            "id": "q1",
+            "text": "\"Hello\" гэдэг ямар утгатай вэ?",
+            "options": [
+              "Баяртай",
+              "Сайн байна уу",
+              "Баярлалаа"
+            ],
+            "answerIndex": 1
+          },
+          {
+            "id": "q2",
+            "text": "\"My name is Bold\" гэдэг өгүүлбэр юу гэсэн утгатай вэ?",
+            "options": [
+              "Миний нэр Болд",
+              "Би Болдыг мэднэ",
+              "Болд хаана байна?"
+            ],
+            "answerIndex": 0
+          },
+          {
+            "id": "q3",
+            "text": "\"Би Монголоос ирсэн\" гэдгийг англиар яаж хэлэх вэ?",
+            "options": [
+              "I go to Mongolia",
+              "I like Mongolia",
+              "I am from Mongolia"
+            ],
+            "answerIndex": 2
+          },
+          {
+            "id": "q4",
+            "text": "\"Thank you\" гэдэг үгийн утга аль нь вэ?",
+            "options": [
+              "Уучлаарай",
+              "Баярлалаа",
+              "Сайн уу"
+            ],
+            "answerIndex": 1
+          },
+          {
+            "id": "q5",
+            "text": "\"See you later\" гэдгийг хэзээ хэлэх вэ?",
+            "options": [
+              "Салах үедээ",
+              "Уулзах үедээ",
+              "Хоол идэхдээ"
+            ],
+            "answerIndex": 0
+          }
+        ]
+      }
+    },
+    {
+      "id": "u2",
+      "title": "Бүлэг 2: Тоо ба өнгө",
+      "description": "1–10 хүртэлх тоо, үндсэн өнгөнүүд",
+      "color": "#1CB0F6",
+      "lessons": [
+        {
+          "id": "u2-l1",
+          "title": "1–5 тоо",
+          "description": "One, two, three, four, five.",
+          "videoUrl": "/videos/u2-l1.mp4",
+          "durationSec": 20
+        },
+        {
+          "id": "u2-l2",
+          "title": "6–10 тоо",
+          "description": "Six, seven, eight, nine, ten.",
+          "videoUrl": "/videos/u2-l2.mp4",
+          "durationSec": 20
+        },
+        {
+          "id": "u2-l3",
+          "title": "Үндсэн өнгө",
+          "description": "Red, blue, yellow — гол өнгөнүүд.",
+          "videoUrl": "/videos/u2-l3.mp4",
+          "durationSec": 20
+        },
+        {
+          "id": "u2-l4",
+          "title": "Өнгө ба зүйл",
+          "description": "A red apple, a blue car — өнгөөр тодорхойлох.",
+          "videoUrl": "/videos/u2-l4.mp4",
+          "durationSec": 20
+        },
+        {
+          "id": "u2-l5",
+          "title": "Хэд вэ?",
+          "description": "How many? — тоо асуух, хариулах.",
+          "videoUrl": "/videos/u2-l5.mp4",
+          "durationSec": 20
+        }
+      ],
+      "quiz": {
+        "id": "u2-quiz",
+        "title": "Бүлэг 2-ын шалгалт",
+        "passPercent": 60,
+        "questions": [
+          {
+            "id": "q1",
+            "text": "\"Three\" гэдэг ямар тоо вэ?",
+            "options": [
+              "2",
+              "3",
+              "5"
+            ],
+            "answerIndex": 1
+          },
+          {
+            "id": "q2",
+            "text": "\"Найм\" гэдгийг англиар яаж хэлэх вэ?",
+            "options": [
+              "Eight",
+              "Nine",
+              "Seven"
+            ],
+            "answerIndex": 0
+          },
+          {
+            "id": "q3",
+            "text": "\"Blue\" ямар өнгө вэ?",
+            "options": [
+              "Улаан",
+              "Шар",
+              "Цэнхэр"
+            ],
+            "answerIndex": 2
+          },
+          {
+            "id": "q4",
+            "text": "\"A red apple\" гэдэг юу вэ?",
+            "options": [
+              "Улаан алим",
+              "Ногоон алим",
+              "Улаан машин"
+            ],
+            "answerIndex": 0
+          },
+          {
+            "id": "q5",
+            "text": "\"How many?\" гэдэг асуулт юу гэсэн үг вэ?",
+            "options": [
+              "Хаана вэ?",
+              "Хэд вэ?",
+              "Хэн бэ?"
+            ],
+            "answerIndex": 1
+          }
+        ]
+      }
+    },
+    {
+      "id": "u3",
+      "title": "Бүлэг 3: Гэр бүл",
+      "description": "Гэр бүлийн гишүүд — тун удахгүй",
+      "color": "#CE82FF",
+      "comingSoon": true,
+      "lessons": [
+        {
+          "id": "u3-l1",
+          "title": "Ээж, аав",
+          "description": "Mother, father.",
+          "videoUrl": "",
+          "durationSec": 0
+        },
+        {
+          "id": "u3-l2",
+          "title": "Ах дүү",
+          "description": "Brother, sister.",
+          "videoUrl": "",
+          "durationSec": 0
+        },
+        {
+          "id": "u3-l3",
+          "title": "Өвөө, эмээ",
+          "description": "Grandfather, grandmother.",
+          "videoUrl": "",
+          "durationSec": 0
+        },
+        {
+          "id": "u3-l4",
+          "title": "Миний гэр бүл",
+          "description": "This is my family.",
+          "videoUrl": "",
+          "durationSec": 0
+        },
+        {
+          "id": "u3-l5",
+          "title": "Нас асуух",
+          "description": "How old are you?",
+          "videoUrl": "",
+          "durationSec": 0
+        }
+      ],
+      "quiz": {
+        "id": "u3-quiz",
+        "title": "Бүлэг 3-ын шалгалт",
+        "passPercent": 60,
+        "questions": []
+      }
+    }
+  ],
+  "user": {
+    "name": "Болд",
+    "avatarUrl": null
+  }
+}

@@ -1,4 +1,4 @@
-/** Content model — mirrors src/data/course.json */
+/** Content model — mirrors GET /api/courses/:id (seeded from server/seed/course.json) */
 export interface Lesson {
   id: string;
   title: string;
@@ -35,7 +35,8 @@ export interface Unit {
 export interface CourseData {
   course: { id: string; title: string };
   units: Unit[];
-  user: { name: string; avatarUrl: string | null };
+  /** Seed default user; the signed-in user comes from the auth store. */
+  user?: { name: string; avatarUrl: string | null };
 }
 
 /** Learner progress — the only thing we persist on device. */

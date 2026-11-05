@@ -2,29 +2,74 @@
 
 Duolingo-гийн pathway маягийн видео хичээлийн mobile app prototype. Хэрэглэгч бүлэг бүрийн 5 видео хичээлийг дарааллаар нь үзэж, дараа нь 5 асуулттай шалгалт өгнө. Тэнцвэл дараагийн бүлэг нээгдэнэ. Ахиц, XP, streak, түвшин нь дэлгэц дээр үргэлж харагдана.
 
-| Нүүр (Pathway) | Видео хичээл | Амжилт | Шалгалт | Үр дүн | Профайл |
-|---|---|---|---|---|---|
-| ![](docs/screenshots/01-home.png) | ![](docs/screenshots/03-lesson-playing.png) | ![](docs/screenshots/04-reward.png) | ![](docs/screenshots/07-quiz-wrong.png) | ![](docs/screenshots/09-quiz-result.png) | ![](docs/screenshots/11-profile.png) |
+| Нэвтрэх | Нүүр (Pathway) | Видео хичээл | Амжилт | Шалгалт | Үр дүн | Профайл |
+|---|---|---|---|---|---|---|
+| ![](docs/screenshots/00-login.png) | ![](docs/screenshots/01-home.png) | ![](docs/screenshots/03-lesson-playing.png) | ![](docs/screenshots/04-reward.png) | ![](docs/screenshots/07-quiz-wrong.png) | ![](docs/screenshots/09-quiz-result.png) | ![](docs/screenshots/11-profile.png) |
 
-> Screenshot-уудыг Expo Web хувилбараас (390×844) авсан. Видео хичээлийн зураг дээрх өнгөт тест дүрс нь автомат тестийн орчинд орлуулсан клип юм. Бодит апп дээр course.json дахь видео тоглоно.
+> Screenshot-уудыг Expo Web хувилбараас (390×844) авсан. Видео хичээлийн зураг дээрх өнгөт тест дүрс нь автомат тестийн орчинд орлуулсан клип юм. Бодит апп дээр өгөгдлийн сангаас ирсэн видео тоглоно.
 
 ## Ажиллуулах заавар
 
-Шаардлага: **Node.js 22+**, утсан дээр **Expo Go** (эсвэл Android emulator / iOS simulator).
+Шаардлага: **Node.js 20+**, утсан дээр **Expo Go**. Утас ба компьютер **нэг Wi-Fi**-д байна.
+
+Апп хичээл, видео, шалгалтын өгөгдлөө **Node.js + SQLite API**-аас татдаг тул эхлээд серверээ асаана.
 
 ```bash
 git clone <repo-url> octolearn && cd octolearn
 npm install
-npx expo start          # QR кодыг Expo Go-оор уншуулна
-npx expo start --web    # вэб хувилбар (браузерт)
+npm run server:install     # server/ хавтасны dependency (better-sqlite3, express)
+
+# Терминал 1 — API сервер (http://localhost:4000)
+npm run server             # анх асахдаа server/seed/course.json-оос өгөгдлийн санг үүсгэнэ
+
+# Терминал 2 — апп
+npx expo start             # QR кодыг Expo Go-оор уншуулна
 ```
+
+Апп нь Metro-гийн LAN IP-г автоматаар ашиглаж `http://<таны-Mac-ийн-IP>:4000` руу хандана. Өөр хаяг ашиглах бол (жишээ нь `--tunnel` горим эсвэл deploy хийсэн сервер) төслийн үндсэн хавтсанд `.env` файл үүсгэнэ:
+
+```
+EXPO_PUBLIC_API_URL=http://192.168.1.10:4000
+```
+
+Хэрэв утас холбогдохгүй бол: Mac-ийн **System Settings → Network → Firewall** дээр `node`-д ирэх холболтыг зөвшөөрнө. Утасны браузераас `http://<IP>:4000/api/health` хаягийг нээж шалгаж болно.
+
+Хичээлийн видеонууд (`server/public/videos/*.mp4`, H.264, 20 сек) нь API серверээс өөрөөс нь `/videos/...` замаар үйлчлэгдэнэ (iOS-д шаардлагатай HTTP Range дэмжинэ). DB-д харьцангуй зам (`/videos/u1-l1.mp4`) хадгалагдаж, API нь хүсэлт ирсэн хаягаар бүрэн URL болгож буцаана. Гадны `https://...` URL ч мөн ажиллана.
+
+`server/seed/course.json` өөрчлөгдвөл сервер дараагийн асалтаар контентыг DB-д автоматаар дахин ачаална (ахиц хадгалагдана). Өгөгдлийн санг ахицын хамт бүрэн шинэчлэх: `npm run server:seed`.
+
+### Нэвтрэх
+
+Апп нээгдэхэд нэвтрэх дэлгэц гарна. Шинэ бүртгэл үүсгэх эсвэл туршилтын эрхээр нэвтэрнэ:
+
+| Имэйл | Нууц үг |
+|---|---|
+| `demo@octolearn.online` | `demo1234` |
+
+Хэрэглэгч бүрийн ахиц сервер дээр тусдаа хадгалагдана. Гараад өөр утсанд нэвтэрсэн ч ахиц сэргэнэ.
 
 Шалгах командууд:
 
 ```bash
-npm run typecheck   # TypeScript strict
-npm test            # домэйн логикийн unit тест (node:test, 10 тест)
+npm run typecheck    # TypeScript strict
+npm test             # домэйн логикийн unit тест (10)
+npm run test:server  # API integration тест (9), in-memory SQLite
 ```
+
+### API
+
+| Method | Path | Тайлбар |
+|---|---|---|
+| GET | `/api/health` | Сервер ажиллаж байгааг шалгах |
+| GET | `/api/courses/:courseId` | Курс, бүлэг, хичээл, шалгалт |
+| POST | `/api/auth/register` | `{name, email, password}` → `{token, user}` |
+| POST | `/api/auth/login` | `{email, password}` → `{token, user}` |
+| POST | `/api/auth/logout` | 🔒 Токеныг хүчингүй болгоно |
+| GET | `/api/me` | 🔒 Нэвтэрсэн хэрэглэгч |
+| GET | `/api/me/progress/:courseId` | 🔒 Өөрийн ахиц (эсвэл `null`) |
+| PUT | `/api/me/progress/:courseId` | 🔒 Ахиц хадгалах (хуучин `updatedAt`-тай бичилтийг үл тооно) |
+
+🔒 = `Authorization: Bearer <token>` шаардлагатай.
 
 ### APK build (Android)
 
@@ -33,7 +78,7 @@ npx eas-cli@latest login
 npx eas-cli@latest build -p android --profile preview   # .apk татах холбоос гарна
 ```
 
-`eas.json` дахь `preview` профайл нь суулгахад бэлэн `.apk` гаргана. iOS-д Expo Go эсвэл `--profile development` ашиглана.
+`eas.json` дахь `preview` профайл нь суулгахад бэлэн `.apk` гаргана. APK нь `EXPO_PUBLIC_API_URL`-аар заасан, интернэтэд нээлттэй (HTTPS) сервер рүү хандах ёстой. iOS-д Expo Go эсвэл `--profile development` ашиглана.
 
 ## Технологи
 
@@ -43,8 +88,21 @@ npx eas-cli@latest build -p android --profile preview   # .apk татах хол
 | Навигаци | **expo-router** (файлд суурилсан) | Stack (хичээл/шалгалт full-screen) + bottom tabs |
 | Видео | **expo-video** | play/pause, seek, fullscreen-тэй native controls; `timeUpdate` event-ээр үзсэн хувийг хэмждэг |
 | State | **zustand** + `persist` middleware | Жижиг, boilerplate бага, selector-оор re-render хязгаарлана |
-| Хадгалалт | **AsyncStorage** | Апп хааж нээхэд ахиц алга болохгүй (web дээр localStorage) |
+| Backend | **Node.js + Express + SQLite** (better-sqlite3) | Контент болон ахицыг сервер дээр хадгална. Нэг файлтай DB тул суулгах зүйлгүй, дараа нь PostgreSQL руу шилжүүлэхэд хялбар |
+| Хадгалалт | **AsyncStorage** | Офлайн cache: ахиц болон сүүлд татсан курс (web дээр localStorage) |
 | Дүрс | @expo/vector-icons (Ionicons) | Duolingo-гийн ассет ашиглаагүй |
+| Фонт | **Manrope** (@expo-google-fonts/manrope) | Загварт Plus Jakarta Sans байсан ч кирилл үсэггүй тул ижил геометр хэлбэртэй, кирилл дэмждэг Manrope-оор орлуулсан |
+| Зураас | react-native-svg | Pathway-н зангилаануудыг холбосон тасархай муруй шугам |
+
+## Дизайн
+
+UI нь Stitch-ээс экспортолсон загвар (`stitch-design.md`) дээр суурилсан. Загварт 4 дэлгэц бий: сургалтын замнал, интерактив тест, хичээлийн үр дүн, профайл.
+
+- Өнгө, зай, радиус, фонтын бүх утгыг `src/theme/index.ts` дотор design token болгон тодорхойлсон. Жишээ нь primary `#412cdd`, secondary `#006c49`, tertiary `#734700`.
+- Товчлуур, зангилаа, хариултын карт бүр доод талдаа 4–5px "ирмэг" хүрээтэй. Дарахад тэр ирмэг багасаж, элемент доошоо дарагдсан мэт харагдана.
+- Нүүр дэлгэцийн дээд хэсэгт идэвхтэй бүлгийн карт тогтмол байрлана. Замнал нь зигзаг хэлбэртэй бөгөөд зангилаануудыг SVG тасархай шугамаар холбосон. Идэвхтэй зангилаан дээр "Эхлэх" гэсэн шошго гарна.
+- Хичээл дуусах болон шалгалтын үр дүнгийн дэлгэц хоёулаа нэг `ResultView` компонентыг ашигладаг. Энэ компонент XP карт, 2 үзүүлэлт, нэг зөвлөгөө харуулна.
+- **Dark mode:** апп эхлэхдээ утасны системийн горимыг дагана. Профайл дээрх 🌙/☀️ товчоор гараар сольж болох бөгөөд сонголт хадгалагдана. Өнгөнүүд `colors`-оос авагддаг ба `applyScheme()` тэдгээрийг шинэчилнэ. Модулийн түвшний style-ууд `themed()`-ээр ороогдсон тул горим солигдоход дахин бүтээгдэнэ (`src/store/themeStore.ts`).
 
 ## Архитектур
 
@@ -58,19 +116,33 @@ src/
     quiz/[id].tsx         # MCQ шалгалт + үр дүн
   components/             # Button, ProgressBar, PathNodeButton, LessonVideo, Toast, ...
   domain/                 # UI-гүй цэвэр логик (types, progress, validate)
-  store/progressStore.ts  # zustand store (persist)
-  data/course.json        # контент
+  app/login.tsx           # Нэвтрэх / бүртгүүлэх дэлгэц
+  api/                    # API хаяг тодорхойлох, fetch client (timeout, Bearer token)
+  store/authStore.ts      # нэвтрэлтийн төлөв, токеныг SecureStore-д хадгалах
+  store/courseStore.ts    # курсийг API-аас татах + офлайн cache
+  store/progressStore.ts  # ахицын zustand store (persist)
+  store/sync.ts           # ахицыг сервертэй синк хийх (last-write-wins)
+server/
+  src/db.js               # SQLite schema, seed
+  src/repo.js             # SQL query-ууд → апп хүлээж авах JSON хэлбэр
+  src/app.js              # Express route-ууд
+  src/auth.js             # нууц үг хэшлэх, токен, auth middleware
+  seed/course.json        # анхны контент
+  test/api.test.js        # API тест
   theme/                  # өнгө, зай, фонт — нэгдсэн дизайн токен
 tests/progress.test.ts    # домэйн логикийн тест
 ```
 
 Гол шийдвэрүүд:
 
-1. **Контент ба ахицыг салгасан.** `course.json` нь зөвхөн контент. Төхөөрөмж дээр зөвхөн ахиц (`completedLessonIds`, `quizResults`, `xp`, `activity`) хадгалагдана. Контент шинэчлэгдсэн ч ахиц эвдрэхгүй, дараа нь backend-ээс контент татахад хялбар.
-2. **Түгжээний төлөвийг хадгалдаггүй, тооцоолдог.** `buildPath()` нь курсийг нэг шугаман зам болгоод: эхний дуусаагүй цэг = *идэвхтэй*, өмнөх нь *дууссан*, дараах нь *түгжээтэй*. Нэг л үнэний эх сурвалжтай тул төлөв зөрөх боломжгүй.
-3. **Бизнес логик цэвэр функц.** `src/domain/progress.ts` нь React/RN-ээс хамааралгүй тул Node-ийн built-in test runner-аар шууд тестлэгддэг (нэмэлт dependency-гүй).
-4. **Нэгдсэн дизайн систем.** Бүх өнгө, зай, фонт `src/theme`-д. Бүх товч 3D маягийн нэг `Button` компонент, дарах талбар ≥ 48dp.
-5. **Төлөв бүрийн UI.** Ахиц ачаалж байх, видео ачаалж байх, видео алдаа (дахин оролдох товчтой), видео байхгүй, түгжээтэй хичээл рүү шууд link-ээр орох, асуултгүй шалгалт гэсэн төлөвүүдийг `StateView`-ээр харуулна.
+1. **Контент өгөгдлийн сангаас ирнэ.** Курс, бүлэг, хичээл (видео URL), шалгалт, асуулт нь SQLite-ийн тусдаа хүснэгтүүдэд хадгалагдана. `GET /api/courses/:id` нь тэдгээрийг нэг JSON болгож буцаана. Видео URL-ыг DB-д солиход апп дараагийн нээлтээр шинэ видеог тоглуулна.
+2. **Ахиц: local-first + серверт синк.** UI нь AsyncStorage дахь ахицыг уншдаг тул сүлжээгүй үед ч ажиллана. Өөрчлөлт бүрийн дараа (400ms debounce) `PUT /api/users/demo/progress/:courseId` руу илгээнэ. Апп асахад серверийн хувилбар шинэ (`updatedAt` их) бол түүнийг авна. Сервер хуучин бичилтийг хүлээж авахгүй (last-write-wins). Ингэснээр апп устгаад дахин суулгасан ч ахиц сэргэнэ.
+3. **Нэвтрэлт.** Нууц үгийг `scrypt` + хэрэглэгч бүрийн random salt-аар хэшилнэ (Node-ийн built-in `crypto`, нэмэлт сангүй). Нэвтэрсний дараа 30 хоногийн opaque bearer token өгнө. DB-д зөвхөн токены SHA-256 хадгалагдана, гарахад устгагдана. Апп токеныг iOS Keychain / Android Keystore-д (`expo-secure-store`) хадгална. Буруу имэйл болон буруу нууц үгэнд ижил хариу өгдөг тул бүртгэлтэй имэйлийг таах боломжгүй. Нэвтрээгүй үед `Stack.Protected` апп руу оруулахгүй. Утсан дээрх ахиц аль хэрэглэгчийнх болохыг тэмдэглэдэг тул өөр хэрэглэгч нэвтрэхэд өмнөхийнх нь ахиц холилдохгүй.
+4. **Офлайн горим.** Курсийг амжилттай татах бүрт cache-д хадгална. Сервер холбогдохгүй бол cache-ээс харуулж "Офлайн горим" гэж мэдэгдэнэ. Cache ч байхгүй бол "Дахин оролдох" товчтой алдааны дэлгэц гарна.
+5. **Түгжээний төлөвийг хадгалдаггүй, тооцоолдог.** `buildPath()` нь курсийг нэг шугаман зам болгоод: эхний дуусаагүй цэг = *идэвхтэй*, өмнөх нь *дууссан*, дараах нь *түгжээтэй*. Нэг л үнэний эх сурвалжтай тул төлөв зөрөх боломжгүй.
+6. **Бизнес логик цэвэр функц.** `src/domain/progress.ts` нь React/RN-ээс хамааралгүй тул Node-ийн built-in test runner-аар шууд тестлэгддэг (нэмэлт dependency-гүй).
+7. **Нэгдсэн дизайн систем.** Бүх өнгө, зай, фонт `src/theme`-д. Бүх товч 3D маягийн нэг `Button` компонент, дарах талбар ≥ 48dp.
+8. **Төлөв бүрийн UI.** Ахиц ачаалж байх, видео ачаалж байх, видео алдаа (дахин оролдох товчтой), видео байхгүй, түгжээтэй хичээл рүү шууд link-ээр орох, асуултгүй шалгалт гэсэн төлөвүүдийг `StateView`-ээр харуулна.
 
 ## Дүрмүүд (шийдвэр гаргасан зүйлс)
 
@@ -92,18 +164,19 @@ tests/progress.test.ts    # домэйн логикийн тест
 
 **P1:** идэвхтэй хичээл рүү автоматаар гүйлгэх, streak, анимэйшнтэй прогресс бар, видео бүтэн дэлгэц, түвшин, reset товч (баталгаажуулах цонхтой).
 
-**P2:** 7 хоногийн идэвхийн график, Expo Web хувилбар, unit тест, zustand state management, курсийн JSON validation, сүлжээ тасарсан үед видеоны алдааны төлөв ба дахин оролдох.
+**P2:** Node.js + SQLite API (контент болон ахицыг серверээс авах/хадгалах), login (бүртгүүлэх, нэвтрэх, гарах, хэрэглэгч тус бүрийн ахиц), 7 хоногийн идэвхийн график, Expo Web хувилбар, unit тест, zustand state management, курсийн JSON validation, сүлжээ тасарсан үед видеоны алдааны төлөв ба дахин оролдох.
 
 ## Хийгээгүй зүйлс
 
-- Backend (Node.js + SQL), login. Контент JSON-оос уншина.
-- Dark mode, Lottie/Rive анимэйшн (энгийн `Animated` API ашигласан).
+- Нууц үг сэргээх, имэйл баталгаажуулалт, login оролдлогын rate limit.
+- Контент засах admin UI (одоо `server/seed/course.json`-г засаад `npm run server:seed`, эсвэл SQLite-г шууд засна).
+- Lottie/Rive анимэйшн (энгийн `Animated` API ашигласан).
 - Видеог offline cache хийх.
 - Шалгалтын дундаас гарахад "гарах уу?" баталгаажуулалт (одоогоор гарахад ахиц тооцогдохгүй).
 
 ## Илүү цаг байсан бол
 
-- Node.js + PostgreSQL API: контент, ахицыг сервер дээр хадгалж, олон төхөөрөмж хооронд синк хийх.
+- Серверийг deploy хийж HTTPS-ээр ажиллуулах, PostgreSQL руу шилжүүлэх, Google/Apple-ээр нэвтрэх.
 - Seek хийж алгасахыг тооцох "жинхэнэ үзсэн хугацаа" (watched ranges) хэмжилт.
 - Өдрийн зорилго, түвшин ахих үеийн тусгай анимэйшн, дуу.
 - Компонентын тест (React Native Testing Library) ба E2E (Maestro).

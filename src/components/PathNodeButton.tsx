@@ -3,157 +3,258 @@ import { Animated, Easing, Pressable, StyleSheet, Text, View } from 'react-nativ
 import Ionicons from '@expo/vector-icons/Ionicons';
 
 import type { PathNode } from '../domain/types';
-import { colors, space, type } from '../theme';
+import { colors, radius, themed, type } from '../theme';
 
-const SIZE = 72;
-const QUIZ_SIZE = 84;
+export const NODE_SIZE = 64;
+export const ACTIVE_SIZE = 72;
+export const QUIZ_SIZE = 80;
+/** Fixed row height so the path connector can be computed. */
+export const NODE_ROW_HEIGHT = 104;
 
 interface Props {
   node: PathNode;
-  unitColor: string;
   onPress: (node: PathNode) => void;
+  /** Which side the "Эхлэх" callout sits on (away from the screen edge). */
+  calloutSide: 'left' | 'right';
 }
 
-/** One circle on the zigzag path. Three visual states + a distinct quiz shape. */
-export function PathNodeButton({ node, unitColor, onPress }: Props) {
+/** One stop on the learning path (design: tactile-node-indigo / -locked / -star). */
+export function PathNodeButton({ node, onPress, calloutSide }: Props) {
   const isQuiz = node.kind === 'quiz';
   const { status } = node;
-  const pulse = useRef(new Animated.Value(0)).current;
+  const active = status === 'active';
+  const anim = useRef(new Animated.Value(0)).current;
 
   useEffect(() => {
-    if (status !== 'active') return;
+    if (!active) return;
     const loop = Animated.loop(
-      Animated.sequence([
-        Animated.timing(pulse, { toValue: 1, duration: 900, easing: Easing.inOut(Easing.quad), useNativeDriver: true }),
-        Animated.timing(pulse, { toValue: 0, duration: 900, easing: Easing.inOut(Easing.quad), useNativeDriver: true }),
-      ]),
+      Animated.timing(anim, {
+        toValue: 1,
+        duration: 1400,
+        easing: Easing.out(Easing.quad),
+        useNativeDriver: true,
+      }),
     );
     loop.start();
     return () => loop.stop();
-  }, [pulse, status]);
+  }, [anim, active]);
 
-  const face =
-    status === 'locked'
-      ? { bg: colors.locked, edge: colors.lockedDark, icon: colors.lockedIcon }
-      : isQuiz
-        ? { bg: colors.gold, edge: colors.goldDark, icon: colors.white }
-        : status === 'completed'
-          ? { bg: colors.green, edge: colors.greenDark, icon: colors.white }
-          : { bg: unitColor, edge: shade(unitColor), icon: colors.white };
+  const size = isQuiz ? QUIZ_SIZE : active ? ACTIVE_SIZE : NODE_SIZE;
+  const statusText = {
+    completed: 'дууссан',
+    active: 'идэвхтэй',
+    locked: 'түгжээтэй',
+  }[status];
 
-  const icon: keyof typeof Ionicons.glyphMap =
-    status === 'locked'
-      ? isQuiz
-        ? 'trophy'
-        : 'lock-closed'
-      : isQuiz
-        ? 'trophy'
-        : status === 'completed'
-          ? 'checkmark'
-          : 'play';
+  let face: {
+    bg: string;
+    edge: string;
+    border?: string;
+    icon: keyof typeof Ionicons.glyphMap;
+    iconColor: string;
+  };
+  if (isQuiz) {
+    face =
+      status === 'locked'
+        ? {
+            bg: colors.surfaceHigh,
+            edge: colors.outlineVariant,
+            icon: 'star',
+            iconColor: colors.outlineVariant,
+          }
+        : {
+            bg: colors.tertiaryFixed,
+            edge: colors.amberShadow,
+            border: colors.tertiary,
+            icon: status === 'completed' ? 'trophy' : 'star',
+            iconColor: colors.tertiary,
+          };
+  } else if (status === 'completed') {
+    face = {
+      bg: colors.primaryContainer,
+      edge: colors.primaryShadow,
+      icon: 'checkmark',
+      iconColor: colors.white,
+    };
+  } else if (active) {
+    face = {
+      bg: colors.surfaceLowest,
+      edge: 'transparent',
+      border: colors.primaryContainer,
+      icon: 'play',
+      iconColor: colors.primary,
+    };
+  } else {
+    face = {
+      bg: colors.surfaceHigh,
+      edge: colors.outlineVariant,
+      icon: 'lock-closed',
+      iconColor: colors.outline,
+    };
+  }
 
-  const statusText = { completed: 'дууссан', active: 'идэвхтэй', locked: 'түгжээтэй' }[status];
+  // Bounce for the callout, ping for the ring.
+  const bounce = anim.interpolate({
+    inputRange: [0, 0.5, 1],
+    outputRange: [0, -6, 0],
+  });
+  const ringScale = anim.interpolate({
+    inputRange: [0, 1],
+    outputRange: [1, 1.35],
+  });
+  const ringOpacity = anim.interpolate({
+    inputRange: [0, 1],
+    outputRange: [0.45, 0],
+  });
 
   return (
-    <View style={styles.container}>
-      {status === 'active' && (
-        <Animated.View
-          style={[
-            styles.bubble,
-            { transform: [{ translateY: pulse.interpolate({ inputRange: [0, 1], outputRange: [0, -5] }) }] },
-          ]}
-        >
-          <Text style={[styles.bubbleText, { color: isQuiz ? colors.goldDark : unitColor }]}>
-            {isQuiz ? 'ШАЛГАЛТ' : 'ЭХЛЭХ'}
-          </Text>
-          <View style={styles.bubbleTail} />
-        </Animated.View>
-      )}
-      {status === 'active' && (
-        <Animated.View
-          pointerEvents="none"
-          style={[
-            styles.ring,
-            isQuiz && styles.quizRing,
-            {
-              borderColor: isQuiz ? colors.gold : unitColor,
-              opacity: pulse.interpolate({ inputRange: [0, 1], outputRange: [0.5, 0.15] }),
-              transform: [{ scale: pulse.interpolate({ inputRange: [0, 1], outputRange: [1, 1.12] }) }],
-            },
-          ]}
-        />
-      )}
-      <Pressable
-        testID={`node-${node.id}`}
-        accessibilityRole="button"
-        accessibilityLabel={`${node.title}, ${statusText}`}
-        onPress={() => onPress(node)}
-        hitSlop={8}
-      >
-        {({ pressed }) => (
-          <View
+    <View style={styles.row}>
+      <View>
+        {active && (
+          <Animated.View
+            pointerEvents="none"
             style={[
-              styles.circle,
-              isQuiz && styles.quizCircle,
+              styles.ring,
               {
-                backgroundColor: face.bg,
-                borderBottomColor: face.edge,
-                borderBottomWidth: pressed ? 3 : 7,
-                marginTop: pressed ? 4 : 0,
+                width: size + 12,
+                height: size + 12,
+                borderRadius: (size + 12) / 2,
+                left: -6,
+                top: -6,
+                borderColor: isQuiz ? colors.tertiary : colors.primaryContainer,
+                opacity: ringOpacity,
+                transform: [{ scale: ringScale }],
               },
             ]}
-          >
-            <Ionicons name={icon} size={isQuiz ? 38 : 32} color={face.icon} />
-          </View>
+          />
         )}
-      </Pressable>
+        {active && (
+          <Animated.View
+            pointerEvents="none"
+            style={[
+              styles.callout,
+              calloutSide === 'left' ? { right: size + 12 } : { left: size + 12 },
+              { top: size / 2 - 16, transform: [{ translateY: bounce }] },
+            ]}
+          >
+            <Text style={styles.calloutText}>{isQuiz ? 'Шалгалт' : 'Эхлэх'}</Text>
+            <Ionicons name="chevron-forward" size={14} color={colors.white} />
+            <View style={[styles.arrow, calloutSide === 'left' ? styles.arrowRight : styles.arrowLeft]} />
+          </Animated.View>
+        )}
+        <Pressable
+          testID={`node-${node.id}`}
+          accessibilityRole="button"
+          accessibilityLabel={`${node.title}, ${statusText}`}
+          onPress={() => onPress(node)}
+          hitSlop={8}
+        >
+          {({ pressed }) => (
+            <View
+              style={[
+                styles.circle,
+                {
+                  width: size,
+                  height: size,
+                  borderRadius: size / 2,
+                  backgroundColor: face.bg,
+                  borderWidth: face.border ? 4 : 0,
+                  borderColor: face.border,
+                  transform: [{ translateY: pressed ? 2 : 0 }, { scale: pressed ? 0.96 : 1 }],
+                },
+                // 3D edge (design: `box-shadow: 0 5px 0 <edge>`), drawn as a bottom border so it works on Android too.
+                active && styles.activeShadow,
+                face.edge !== 'transparent' && {
+                  borderBottomWidth: pressed ? 3 : 5,
+                  borderBottomColor: face.edge,
+                },
+              ]}
+            >
+              <Ionicons
+                name={face.icon}
+                size={isQuiz ? 36 : active ? 36 : status === 'locked' ? 24 : 30}
+                color={face.iconColor}
+                style={active && !isQuiz ? { marginLeft: 4 } : undefined}
+              />
+              {isQuiz && status === 'completed' && (
+                <View style={styles.badge}>
+                  <Ionicons name="checkmark" size={12} color={colors.white} />
+                </View>
+              )}
+            </View>
+          )}
+        </Pressable>
+      </View>
     </View>
   );
 }
 
-/** Darken a hex colour ~20% for the 3D edge. */
-function shade(hex: string) {
-  const n = parseInt(hex.slice(1), 16);
-  const f = (c: number) => Math.max(0, Math.round(c * 0.78));
-  const r = f(n >> 16), g = f((n >> 8) & 255), b = f(n & 255);
-  return `#${((1 << 24) | (r << 16) | (g << 8) | b).toString(16).slice(1)}`;
-}
-
-const styles = StyleSheet.create({
-  container: { alignItems: 'center', justifyContent: 'flex-end', height: QUIZ_SIZE + 52 },
-  circle: { width: SIZE, height: SIZE, borderRadius: SIZE / 2, alignItems: 'center', justifyContent: 'center' },
-  quizCircle: { width: QUIZ_SIZE, height: QUIZ_SIZE, borderRadius: QUIZ_SIZE / 2 },
-  quizRing: { width: QUIZ_SIZE + 16, height: QUIZ_SIZE + 16, borderRadius: (QUIZ_SIZE + 16) / 2 },
-  ring: {
-    position: 'absolute',
-    bottom: -8,
-    width: SIZE + 16,
-    height: SIZE + 16,
-    borderRadius: (SIZE + 16) / 2,
-    borderWidth: 6,
-  },
-  bubble: {
-    position: 'absolute',
-    top: 0,
-    backgroundColor: colors.white,
-    borderWidth: 2,
-    borderColor: colors.border,
-    borderRadius: 12,
-    paddingHorizontal: space.md,
-    paddingVertical: 6,
-    alignItems: 'center',
-    zIndex: 2,
-  },
-  bubbleText: { ...type.caption, fontWeight: '800', letterSpacing: 1 },
-  bubbleTail: {
-    position: 'absolute',
-    bottom: -7,
-    width: 12,
-    height: 12,
-    backgroundColor: colors.white,
-    borderRightWidth: 2,
-    borderBottomWidth: 2,
-    borderColor: colors.border,
-    transform: [{ rotate: '45deg' }],
-  },
-});
+const styles = themed(() =>
+  StyleSheet.create({
+    row: {
+      height: NODE_ROW_HEIGHT,
+      justifyContent: 'center',
+      alignItems: 'center',
+    },
+    circle: { alignItems: 'center', justifyContent: 'center' },
+    activeShadow: {
+      shadowColor: colors.primaryContainer,
+      shadowOpacity: 0.3,
+      shadowRadius: 10,
+      shadowOffset: { width: 0, height: 6 },
+      elevation: 6,
+    },
+    ring: { position: 'absolute', borderWidth: 2 },
+    callout: {
+      position: 'absolute',
+      flexDirection: 'row',
+      alignItems: 'center',
+      gap: 2,
+      backgroundColor: colors.inverseSurface,
+      paddingLeft: 14,
+      paddingRight: 10,
+      height: 32,
+      borderRadius: radius.pill,
+      zIndex: 5,
+      shadowColor: '#000',
+      shadowOpacity: 0.2,
+      shadowRadius: 8,
+      shadowOffset: { width: 0, height: 4 },
+      elevation: 5,
+    },
+    calloutText: { ...type.labelMd, color: colors.white },
+    arrow: {
+      position: 'absolute',
+      top: 10,
+      width: 0,
+      height: 0,
+      borderTopWidth: 6,
+      borderBottomWidth: 6,
+      borderTopColor: 'transparent',
+      borderBottomColor: 'transparent',
+    },
+    arrowRight: {
+      right: -6,
+      borderLeftWidth: 6,
+      borderLeftColor: colors.inverseSurface,
+    },
+    arrowLeft: {
+      left: -6,
+      borderRightWidth: 6,
+      borderRightColor: colors.inverseSurface,
+    },
+    badge: {
+      position: 'absolute',
+      right: -2,
+      bottom: -2,
+      width: 22,
+      height: 22,
+      borderRadius: 11,
+      backgroundColor: colors.secondary,
+      borderWidth: 2,
+      borderColor: colors.surfaceLowest,
+      alignItems: 'center',
+      justifyContent: 'center',
+    },
+  }),
+);

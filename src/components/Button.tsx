@@ -1,15 +1,25 @@
 import { Pressable, StyleSheet, Text, View, type ViewStyle } from 'react-native';
+import Ionicons from '@expo/vector-icons/Ionicons';
 
-import { colors, HIT, radius, type } from '../theme';
+import { colors, radius, themed, type } from '../theme';
 
 type Variant = 'primary' | 'success' | 'danger' | 'secondary';
 
-const palette: Record<Variant, { bg: string; edge: string; fg: string }> = {
-  primary: { bg: colors.brand, edge: colors.brandDark, fg: colors.white },
-  success: { bg: colors.green, edge: colors.greenDark, fg: colors.white },
-  danger: { bg: colors.red, edge: colors.redDark, fg: colors.white },
-  secondary: { bg: colors.white, edge: colors.border, fg: colors.brand },
-};
+const palette: Record<Variant, { bg: string; edge: string; fg: string; border?: string }> = themed(() => ({
+  primary: {
+    bg: colors.primaryContainer,
+    edge: colors.primaryShadow,
+    fg: colors.white,
+  },
+  success: { bg: colors.secondary, edge: colors.successEdge, fg: colors.white },
+  danger: { bg: colors.error, edge: colors.onErrorContainer, fg: colors.white },
+  secondary: {
+    bg: colors.surfaceLowest,
+    edge: colors.surfaceHigh,
+    fg: colors.primary,
+    border: colors.secondaryBorder,
+  },
+}));
 
 interface Props {
   label: string;
@@ -18,13 +28,22 @@ interface Props {
   disabled?: boolean;
   style?: ViewStyle;
   testID?: string;
+  icon?: keyof typeof Ionicons.glyphMap;
+  /** Icon before the label (default: after). */
+  iconLeading?: boolean;
 }
 
-/** Chunky "3D" button used for every primary action in the app. */
-export function Button({ label, onPress, variant = 'primary', disabled, style, testID }: Props) {
+/** Tactile 3D button (design: `tactile-btn-primary` — 4px solid shadow, presses down 2px). */
+export function Button({ label, onPress, variant = 'primary', disabled, style, testID, icon, iconLeading }: Props) {
   const p = disabled
-    ? { bg: colors.locked, edge: colors.lockedDark, fg: colors.lockedIcon }
+    ? {
+        bg: colors.surfaceHigh,
+        edge: colors.outlineVariant,
+        fg: colors.outline,
+        border: undefined,
+      }
     : palette[variant];
+  const iconEl = icon ? <Ionicons name={icon} size={20} color={p.fg} /> : null;
   return (
     <Pressable
       testID={testID}
@@ -41,28 +60,35 @@ export function Button({ label, onPress, variant = 'primary', disabled, style, t
             styles.base,
             {
               backgroundColor: p.bg,
-              borderColor: variant === 'secondary' && !disabled ? colors.border : p.bg,
+              borderColor: p.border ?? p.bg,
+              borderWidth: p.border ? 2 : 0,
+              shadowColor: p.edge,
               borderBottomColor: p.edge,
-              borderBottomWidth: pressed ? 2 : 5,
-              marginTop: pressed ? 3 : 0,
+              borderBottomWidth: pressed ? 2 : 4,
+              transform: [{ translateY: pressed ? 2 : 0 }],
             },
           ]}
         >
-          <Text style={[styles.label, { color: p.fg }]}>{label.toUpperCase()}</Text>
+          {iconLeading && iconEl}
+          <Text style={[styles.label, { color: p.fg }]}>{label}</Text>
+          {!iconLeading && iconEl}
         </View>
       )}
     </Pressable>
   );
 }
 
-const styles = StyleSheet.create({
-  base: {
-    minHeight: HIT + 4,
-    borderRadius: radius.md,
-    borderWidth: 2,
-    alignItems: 'center',
-    justifyContent: 'center',
-    paddingHorizontal: 20,
-  },
-  label: { ...type.title, letterSpacing: 0.8 },
-});
+const styles = themed(() =>
+  StyleSheet.create({
+    base: {
+      height: 56,
+      borderRadius: radius.lg,
+      flexDirection: 'row',
+      alignItems: 'center',
+      justifyContent: 'center',
+      gap: 8,
+      paddingHorizontal: 20,
+    },
+    label: { ...type.labelLg },
+  }),
+);

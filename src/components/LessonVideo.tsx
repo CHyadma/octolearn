@@ -4,7 +4,7 @@ import { forwardRef, useImperativeHandle, useState } from 'react';
 import { ActivityIndicator, StyleSheet, Text, View } from 'react-native';
 import Ionicons from '@expo/vector-icons/Ionicons';
 
-import { colors, radius, space, type } from '../theme';
+import { colors, radius, space, themed, type } from '../theme';
 import { Button } from './Button';
 
 export interface LessonVideoHandle {
@@ -23,10 +23,7 @@ interface Props {
  * Video player with native controls (play/pause, seek, fullscreen) plus
  * loading and error overlays. Reports watch progress via `timeUpdate`.
  */
-export const LessonVideo = forwardRef<LessonVideoHandle, Props>(function LessonVideo(
-  { url, durationSec, onProgress },
-  ref,
-) {
+export const LessonVideo = forwardRef<LessonVideoHandle, Props>(function LessonVideo({ url, durationSec, onProgress }, ref) {
   const player = useVideoPlayer(url ? { uri: url } : null, (p) => {
     p.timeUpdateEventInterval = 0.5;
   });
@@ -85,23 +82,25 @@ export const LessonVideo = forwardRef<LessonVideoHandle, Props>(function LessonV
   );
 });
 
-const styles = StyleSheet.create({
-  frame: {
-    width: '100%',
-    aspectRatio: 16 / 9,
-    backgroundColor: '#111',
-    borderRadius: radius.lg,
-    overflow: 'hidden',
-  },
-  overlay: {
-    ...StyleSheet.absoluteFill,
-    alignItems: 'center',
-    justifyContent: 'center',
-    gap: space.sm,
-    padding: space.lg,
-    backgroundColor: 'rgba(0,0,0,0.55)',
-  },
-  overlayText: { ...type.body, color: colors.white, textAlign: 'center' },
-  debug: { ...type.caption, color: '#bbb' },
-  retry: { marginTop: space.sm, minWidth: 200 },
-});
+const styles = themed(() =>
+  StyleSheet.create({
+    frame: {
+      width: '100%',
+      aspectRatio: 16 / 9,
+      backgroundColor: '#111',
+      borderRadius: radius.lg,
+      overflow: 'hidden',
+    },
+    overlay: {
+      ...StyleSheet.absoluteFill,
+      alignItems: 'center',
+      justifyContent: 'center',
+      gap: space.sm,
+      padding: space.lg,
+      backgroundColor: 'rgba(0,0,0,0.55)',
+    },
+    overlayText: { ...type.body, color: colors.white, textAlign: 'center' },
+    debug: { ...type.caption, color: '#bbb' },
+    retry: { marginTop: space.sm, minWidth: 200 },
+  }),
+);

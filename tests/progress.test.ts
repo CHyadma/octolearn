@@ -6,7 +6,7 @@ import * as P from '../src/domain/progress.ts';
 import { validateCourse } from '../src/domain/validate.ts';
 import type { CourseData, ProgressState } from '../src/domain/types.ts';
 
-const course: CourseData = JSON.parse(readFileSync(new URL('../src/data/course.json', import.meta.url), 'utf8'));
+const course: CourseData = JSON.parse(readFileSync(new URL('../server/seed/course.json', import.meta.url), 'utf8'));
 const DAY = '2026-11-03';
 
 const finishLessons = (s: ProgressState, ids: string[]) =>

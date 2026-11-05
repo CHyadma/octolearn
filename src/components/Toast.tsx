@@ -3,7 +3,7 @@ import { Animated, StyleSheet, Text, View } from 'react-native';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
 import Ionicons from '@expo/vector-icons/Ionicons';
 
-import { colors, radius, space, type } from '../theme';
+import { colors, radius, space, themed, type } from '../theme';
 
 type Show = (message: string, icon?: keyof typeof Ionicons.glyphMap) => void;
 const ToastContext = createContext<Show>(() => {});
@@ -13,7 +13,10 @@ export const useToast = () => useContext(ToastContext);
 /** App-wide lightweight toast (works identically on iOS, Android and web). */
 export function ToastProvider({ children }: { children: ReactNode }) {
   const insets = useSafeAreaInsets();
-  const [toast, setToast] = useState<{ message: string; icon: keyof typeof Ionicons.glyphMap } | null>(null);
+  const [toast, setToast] = useState<{
+    message: string;
+    icon: keyof typeof Ionicons.glyphMap;
+  } | null>(null);
   const anim = useRef(new Animated.Value(0)).current;
   const timer = useRef<ReturnType<typeof setTimeout> | null>(null);
 
@@ -22,9 +25,17 @@ export function ToastProvider({ children }: { children: ReactNode }) {
       if (timer.current) clearTimeout(timer.current);
       setToast({ message, icon });
       anim.setValue(0);
-      Animated.spring(anim, { toValue: 1, useNativeDriver: true, friction: 7 }).start();
+      Animated.spring(anim, {
+        toValue: 1,
+        useNativeDriver: true,
+        friction: 7,
+      }).start();
       timer.current = setTimeout(() => {
-        Animated.timing(anim, { toValue: 0, duration: 200, useNativeDriver: true }).start(() => setToast(null));
+        Animated.timing(anim, {
+          toValue: 0,
+          duration: 200,
+          useNativeDriver: true,
+        }).start(() => setToast(null));
       }, 2200);
     },
     [anim],
@@ -41,7 +52,14 @@ export function ToastProvider({ children }: { children: ReactNode }) {
               styles.toast,
               {
                 opacity: anim,
-                transform: [{ translateY: anim.interpolate({ inputRange: [0, 1], outputRange: [-16, 0] }) }],
+                transform: [
+                  {
+                    translateY: anim.interpolate({
+                      inputRange: [0, 1],
+                      outputRange: [-16, 0],
+                    }),
+                  },
+                ],
               },
             ]}
           >
@@ -54,17 +72,24 @@ export function ToastProvider({ children }: { children: ReactNode }) {
   );
 }
 
-const styles = StyleSheet.create({
-  wrap: { position: 'absolute', left: space.lg, right: space.lg, alignItems: 'center' },
-  toast: {
-    flexDirection: 'row',
-    alignItems: 'center',
-    gap: space.sm,
-    backgroundColor: colors.text,
-    paddingVertical: space.md,
-    paddingHorizontal: space.lg,
-    borderRadius: radius.md,
-    maxWidth: 420,
-  },
-  text: { ...type.body, color: colors.white, flexShrink: 1 },
-});
+const styles = themed(() =>
+  StyleSheet.create({
+    wrap: {
+      position: 'absolute',
+      left: space.lg,
+      right: space.lg,
+      alignItems: 'center',
+    },
+    toast: {
+      flexDirection: 'row',
+      alignItems: 'center',
+      gap: space.sm,
+      backgroundColor: colors.inverseSurface,
+      paddingVertical: space.md,
+      paddingHorizontal: space.lg,
+      borderRadius: radius.pill,
+      maxWidth: 420,
+    },
+    text: { ...type.labelMd, color: colors.white, flexShrink: 1 },
+  }),
+);
